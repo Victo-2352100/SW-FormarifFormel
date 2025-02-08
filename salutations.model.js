@@ -1,3 +1,6 @@
+import db from './db.js';
+const requeteListe = "SELECT code_langue, langue, message FROM salutations";
+
 const salutations = [
     { code_langue : "fr", langue : "Français", message : "Bonjour le monde"},
     { code_langue : "fr", langue : "Français", message : "Bon matin"},
@@ -25,8 +28,53 @@ const message = [
     }
 ]
 return JSON.stringify(message);
-}
+};
+
+const ListeDeSalutations = () => {
+return new Promise((resolve, reject) => {
+    db.query(requeteListe, (erreur, resultat) => {
+        if (erreur) {
+            console.log(`Erreur sqlState ${erreur.sqlState} : ${erreur.sqlMessage}`);
+            // S'il y a une erreur, la retourner avec la fonction reject
+            reject(erreur);
+        }
+        // Ou retourner le résultat sans validation
+        resolve(resultat);
+    });
+});
+};
+
+const trouverSalutation = (_code_langue) => {
+    return new Promise((resolve, reject) => {
+    const requeteLangue = "SELECT message FROM salutations WHERE code_langue = ? LIMIT 1";
+    const params = [_code_langue];
+    db.query(requeteLangue, params, (erreur, resultat) => {
+        if (erreur) {
+            console.log(`Erreur sqlState ${erreur.sqlState} : ${erreur.sqlMessage}`);
+            // S'il y a une erreur, la retourner avec la fonction reject
+            reject(erreur);
+        }
+        // Ou retourner le résultat sans validation
+        resolve(resultat);
+    });
+});
+};
+const DBAjoutSalutation = (_langue, _code_langue, _salutation) => {
+    return new Promise((resolve, reject) => {
+        const requeteInsert = "INSERT INTO salutations (code_langue, langue, message) VALUES ?, ?, ?";
+        const params = [_code_langue, _langue, _salutation];
+        db.query(requeteInsert, params, (erreur, resultat) => {
+            if (erreur) {
+                console.log(`Erreur sqlState ${erreur.sqlState} : ${erreur.sqlMessage}`);
+                reject(erreur);
+            }
+            resolve(resultat);
+        });
+    });
+};
 export { 
     salutations,
-    AjouterSalutation
+    AjouterSalutation,
+    trouverSalutation,
+    ListeDeSalutations
 };
